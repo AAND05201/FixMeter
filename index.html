@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกงานสับเปลี่ยนมิเตอร์</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Leaflet CSS & JS สำหรับแผนที่ -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+        .hide-on-export { display: block; }
+        .exporting .hide-on-export { display: none !important; }
+        .exporting { background: white; padding: 20px; border-radius: 0; }
+        
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8); z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6;
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-800 pb-20">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner mb-4"></div>
+        <p class="text-lg font-semibold text-blue-600" id="loadingText">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="max-w-2xl mx-auto bg-white min-h-screen shadow-lg" id="appContainer">
+        
+        <!-- Header -->
+        <header class="bg-blue-700 text-white p-4 sticky top-0 z-10 shadow-md">
+            <h1 class="text-xl font-bold text-center"><i class="fa-solid fa-bolt mr-2"></i>บันทึกงานสับเปลี่ยนมิเตอร์</h1>
+        </header>
+
+        <form id="mainForm" class="p-5 space-y-6">
+            
+            <!-- 0. ทีมปฏิบัติงาน -->
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <label class="block font-semibold mb-2">0. ทีมปฏิบัติงาน <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="flex items-center space-x-2 bg-white p-2 rounded border cursor-pointer hover:bg-blue-100">
+                        <input type="radio" name="team" value="ทีมแก้ไฟ" required class="text-blue-600 form-radio">
+                        <span class="text-sm">ทีมแก้ไฟ</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2 rounded border cursor-pointer hover:bg-blue-100">
+                        <input type="radio" name="team" value="ทีมงานมิเตอร์" class="text-blue-600 form-radio">
+                        <span class="text-sm">ทีมงานมิเตอร์</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2 rounded border cursor-pointer hover:bg-blue-100">
+                        <input type="radio" name="team" value="ลุงกบ" class="text-blue-600 form-radio">
+                        <span class="text-sm">ลุงกบ</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 1. การดำเนินการ -->
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <label class="block font-semibold mb-2">1. การดำเนินการ <span class="text-red-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center space-x-2 bg-white p-2 rounded border cursor-pointer hover:bg-blue-100">
+                        <input type="radio" name="action" value="สับเปลี่ยนมิเตอร์" required class="text-blue-600 form-radio">
+                        <span>สับเปลี่ยนมิเตอร์</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2 rounded border cursor-pointer hover:bg-blue-100">
+                        <input type="radio" name="action" value="ต่อตรง" class="text-blue-600 form-radio">
+                        <span>ต่อตรง</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2. พิกัดแผนที่ -->
+            <div class="p-4 rounded-xl border border-gray-200">
+                <label class="block font-semibold mb-2">2. ตำแหน่งปัจจุบัน <span class="text-red-500">*</span></label>
+                <button type="button" onclick="getLocation()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow mb-2 hide-on-export">
+                    <i class="fa-solid fa-location-crosshairs mr-2"></i> โหลดพิกัดแผนที่ปัจจุบัน
+                </button>
+                <input type="text" id="latlong" readonly required placeholder="Lat, Long (กดปุ่มด้านบน)" class="w-full p-2 border rounded bg-gray-100 text-sm mb-1">
+                <textarea id="address" readonly rows="2" placeholder="ชื่อบ้าน/ตำบล (จะดึงอัตโนมัติเมื่อกดโหลดพิกัด)" class="w-full p-2 border rounded bg-gray-100 text-sm text-gray-600 mb-2"></textarea>
+                
+                <!-- แผนที่สำหรับดูและเลื่อนหมุด -->
+                <div id="mapContainer" class="w-full h-48 rounded border shadow-inner mb-2 hide-on-export" style="display: none; z-index: 1;"></div>
+                <p id="mapInstruction" class="text-xs text-blue-600 mb-2 hide-on-export" style="display: none;"><i class="fa-solid fa-info-circle"></i> สามารถแตะเลื่อนหมุดสีน้ำเงิน เพื่อปรับตำแหน่งให้ตรงกับหน้างานได้</p>
+
+                <p id="geoWarning" class="text-xs text-red-500 mt-1">** กรุณาโหลดพิกัดก่อนถ่ายรูป เพื่อให้ข้อมูลประทับลงบนภาพ **</p>
+            </div>
+
+            <!-- 3 & 4. ภาพมิเตอร์เก่า -->
+            <div class="p-4 rounded-xl border border-red-200 bg-red-50">
+                <h3 class="font-bold text-red-700 mb-3 border-b border-red-200 pb-2">มิเตอร์เครื่องเก่า</h3>
+                
+                <!-- 3. ภาพมิเตอร์เก่า -->
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-sm">3. ภาพมิเตอร์เครื่องเก่า <span class="text-red-500">*</span></label>
+                    <input type="file" accept="image/*" capture="environment" id="fileImg3" class="hidden" onchange="processImage(this, 'preview3', 'dataImg3')">
+                    <button type="button" onclick="document.getElementById('fileImg3').click()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded border border-gray-400 border-dashed hide-on-export">
+                        <i class="fa-solid fa-camera fa-2x mb-1 block"></i> แตะเพื่อถ่ายภาพ
+                    </button>
+                    <img id="preview3" class="mt-2 w-full rounded hidden shadow-md">
+                    <input type="hidden" id="dataImg3" required>
+                </div>
+
+                <!-- 4. ภาพบิล/มุมกว้าง -->
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-sm">4. ภาพบิล/มุมกว้าง (ถ้ามี)</label>
+                    <input type="file" accept="image/*" capture="environment" id="fileImg4" class="hidden" onchange="processImage(this, 'preview4', 'dataImg4')">
+                    <button type="button" onclick="document.getElementById('fileImg4').click()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded border border-gray-400 border-dashed hide-on-export">
+                        <i class="fa-solid fa-camera mr-2"></i> แตะเพื่อถ่ายภาพ (เผื่อเลือก)
+                    </button>
+                    <img id="preview4" class="mt-2 w-full rounded hidden shadow-md">
+                    <input type="hidden" id="dataImg4">
+                </div>
+
+                <!-- 5. ข้อความมิเตอร์เก่า -->
+                <div>
+                    <label class="block font-semibold mb-1 text-sm">5. ข้อความอธิบาย/PEA/หน่วย</label>
+                    <div class="flex flex-col space-y-2">
+                        <textarea id="descOld" inputmode="text" rows="2" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 text-base" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
+                        <div class="flex justify-between hide-on-export space-x-2">
+                            <button type="button" onclick="startSpeechToText('descOld')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-3 rounded-lg border border-red-300 flex items-center justify-center font-semibold transition">
+                                <i class="fa-solid fa-microphone mr-2 text-xl"></i> พูด
+                            </button>
+                            <button type="button" onclick="toggleInputMode('descOld', this)" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 rounded-lg border border-blue-300 flex items-center justify-center font-semibold transition">
+                                <i class="fa-solid fa-font mr-2 text-xl"></i> แป้นพิมพ์
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6 & 7. ภาพมิเตอร์ใหม่ -->
+            <div class="p-4 rounded-xl border border-green-200 bg-green-50">
+                <h3 class="font-bold text-green-700 mb-3 border-b border-green-200 pb-2">มิเตอร์เครื่องใหม่</h3>
+                
+                <!-- 6. ภาพมิเตอร์ใหม่ -->
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-sm">6. ภาพมิเตอร์เครื่องใหม่ <span class="text-red-500">*</span></label>
+                    <input type="file" accept="image/*" capture="environment" id="fileImg6" class="hidden" onchange="processImage(this, 'preview6', 'dataImg6')">
+                    <button type="button" onclick="document.getElementById('fileImg6').click()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded border border-gray-400 border-dashed hide-on-export">
+                        <i class="fa-solid fa-camera fa-2x mb-1 block"></i> แตะเพื่อถ่ายภาพ
+                    </button>
+                    <img id="preview6" class="mt-2 w-full rounded hidden shadow-md">
+                    <input type="hidden" id="dataImg6" required>
+                </div>
+
+                <!-- 7. ภาพกล่อง/มุมกว้างใหม่ -->
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1 text-sm">7. ภาพกล่องมิเตอร์/มุมกว้าง (ถ้ามี)</label>
+                    <input type="file" accept="image/*" capture="environment" id="fileImg7" class="hidden" onchange="processImage(this, 'preview7', 'dataImg7')">
+                    <button type="button" onclick="document.getElementById('fileImg7').click()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded border border-gray-400 border-dashed hide-on-export">
+                        <i class="fa-solid fa-camera mr-2"></i> แตะเพื่อถ่ายภาพ (เผื่อเลือก)
+                    </button>
+                    <img id="preview7" class="mt-2 w-full rounded hidden shadow-md">
+                    <input type="hidden" id="dataImg7">
+                </div>
+
+                <!-- 8. ข้อความมิเตอร์ใหม่ -->
+                <div>
+                    <label class="block font-semibold mb-1 text-sm">8. ข้อความอธิบาย/PEA/หน่วย</label>
+                    <div class="flex flex-col space-y-2">
+                        <textarea id="descNew" inputmode="text" rows="2" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 text-base" placeholder="พิมพ์ข้อความที่นี่..."></textarea>
+                        <div class="flex justify-between hide-on-export space-x-2">
+                            <button type="button" onclick="startSpeechToText('descNew')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-3 rounded-lg border border-red-300 flex items-center justify-center font-semibold transition">
+                                <i class="fa-solid fa-microphone mr-2 text-xl"></i> พูด
+                            </button>
+                            <button type="button" onclick="toggleInputMode('descNew', this)" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 rounded-lg border border-blue-300 flex items-center justify-center font-semibold transition">
+                                <i class="fa-solid fa-font mr-2 text-xl"></i> แป้นพิมพ์
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. หมายเหตุ -->
+            <div class="p-4 rounded-xl border border-gray-200">
+                <label class="block font-semibold mb-1 text-sm">9. หมายเหตุเพิ่มเติม</label>
+                <div class="flex flex-col space-y-2">
+                    <textarea id="remark" inputmode="text" rows="2" class="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 text-base" placeholder="หมายเหตุ..."></textarea>
+                    <div class="flex justify-between hide-on-export space-x-2">
+                        <button type="button" onclick="startSpeechToText('remark')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-600 py-3 rounded-lg border border-red-300 flex items-center justify-center font-semibold transition">
+                            <i class="fa-solid fa-microphone mr-2 text-xl"></i> พูด
+                        </button>
+                        <button type="button" onclick="toggleInputMode('remark', this)" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-3 rounded-lg border border-blue-300 flex items-center justify-center font-semibold transition">
+                            <i class="fa-solid fa-font mr-2 text-xl"></i> แป้นพิมพ์
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. Submit Button -->
+            <div class="pt-4 hide-on-export">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg text-lg flex justify-center items-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> บันทึกข้อมูลและสร้างรายงาน
+                </button>
+            </div>
+            
+        </form>
+    </div>
+    
+    <!-- Canvas for Image Processing (Hidden) -->
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script>
+        // ==========================================
+        // 1. ตั้งค่า URL ของ Google Apps Script ที่นี่
+        // ==========================================
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzbOHLoXwBn5mMmndT5j8U7ot8-OoZlVjFcDj_cst8nVnZZ5KXKlOyzyzksEYQgtpUfPg/exec'; // <-- เอา URL ที่ได้จากขั้นตอน Deploy มาวางในเครื่องหมายคำพูดนี้
+        
+        let currentLat = "";
+        let currentLong = "";
+        let currentAddress = "";
+
+        let map = null;
+        let marker = null;
+
+        // ==========================================
+        // Geolocation & Reverse Geocoding
+        // ==========================================
+        function getLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('loadingText').innerText = "กำลังค้นหาพิกัด...";
+                document.getElementById('loadingOverlay').style.display = "flex";
+                
+                navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            } else {
+                Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์นี้ไม่รองรับ Geolocation', 'error');
+            }
+        }
+
+        async function fetchAddressData(lat, lng) {
+            document.getElementById('loadingText').innerText = "กำลังดึงข้อมูลที่อยู่...";
+            document.getElementById('loadingOverlay').style.display = "flex";
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                const data = await response.json();
+                
+                let addr = data.address || {};
+                let addrText = "";
+                if(addr.village || addr.suburb || addr.neighbourhood) addrText += (addr.village || addr.suburb || addr.neighbourhood) + " ";
+                if(addr.town || addr.city || addr.county) addrText += "ต." + (addr.town || addr.city || addr.county) + " ";
+                if(addr.state) addrText += "จ." + addr.state;
+                
+                currentAddress = addrText.trim() || (data.display_name ? data.display_name.substring(0, 50) : "ไม่ระบุ");
+                document.getElementById('address').value = currentAddress;
+            } catch (error) {
+                console.error("Address fetch failed:", error);
+                currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
+                document.getElementById('address').value = currentAddress;
+            }
+            document.getElementById('loadingOverlay').style.display = "none";
+        }
+
+        async function showPosition(position) {
+            currentLat = position.coords.latitude.toFixed(6);
+            currentLong = position.coords.longitude.toFixed(6);
+            document.getElementById('latlong').value = `${currentLat}, ${currentLong}`;
+            document.getElementById('geoWarning').style.display = 'none';
+            
+            // แสดงแผนที่
+            const mapContainer = document.getElementById('mapContainer');
+            mapContainer.style.display = 'block';
+            document.getElementById('mapInstruction').style.display = 'block';
+
+            if (!map) {
+                // สร้างแผนที่ใหม่ถ้ายังไม่มี
+                map = L.map('mapContainer').setView([currentLat, currentLong], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                marker = L.marker([currentLat, currentLong], { draggable: true }).addTo(map);
+
+                // ตรวจจับเมื่อผู้ใช้ลากหมุดเสร็จ
+                marker.on('dragend', function (e) {
+                    const newPos = marker.getLatLng();
+                    currentLat = newPos.lat.toFixed(6);
+                    currentLong = newPos.lng.toFixed(6);
+                    document.getElementById('latlong').value = `${currentLat}, ${currentLong}`;
+                    fetchAddressData(currentLat, currentLong); // แปลงพิกัดใหม่เป็นที่อยู่
+                });
+            } else {
+                // อัปเดตตำแหน่งถ้ามีแผนที่อยู่แล้ว
+                map.setView([currentLat, currentLong], 16);
+                marker.setLatLng([currentLat, currentLong]);
+            }
+            
+            // แก้ไขปัญหาแผนที่เรนเดอร์ไม่สมบูรณ์ (แหว่ง) เมื่อเปลี่ยน display เป็น block
+            setTimeout(() => { map.invalidateSize(); }, 200);
+
+            // ดึงข้อมูลที่อยู่
+            await fetchAddressData(currentLat, currentLong);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'ดึงพิกัดสำเร็จ',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+
+        function showError(error) {
+            document.getElementById('loadingOverlay').style.display = "none";
+            let msg = "";
+            switch(error.code) {
+                case error.PERMISSION_DENIED: msg = "ผู้ใช้ปฏิเสธการเข้าถึงตำแหน่งที่ตั้ง"; break;
+                case error.POSITION_UNAVAILABLE: msg = "ไม่มีข้อมูลตำแหน่งที่ตั้ง"; break;
+                case error.TIMEOUT: msg = "หมดเวลาการค้นหาตำแหน่ง"; break;
+                default: msg = "เกิดข้อผิดพลาดไม่ทราบสาเหตุ"; break;
+            }
+            Swal.fire('ดึงพิกัดล้มเหลว', msg, 'error');
+        }
+
+        // ==========================================
+        // Image Processing & Stamping
+        // ==========================================
+        function processImage(input, previewId, dataId) {
+            if (input.files && input.files[0]) {
+                if(!currentLat) {
+                    Swal.fire('แจ้งเตือน', 'กรุณากดโหลดพิกัดแผนที่ก่อนถ่ายภาพ เพื่อให้ประทับข้อมูลบนภาพ', 'warning');
+                    input.value = ""; // Clear file
+                    return;
+                }
+
+                document.getElementById('loadingText').innerText = "กำลังประทับตราพิกัดลงบนภาพ...";
+                document.getElementById('loadingOverlay').style.display = "flex";
+
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.getElementById('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // กำหนดขนาดสูงสุดเพื่อลดขนาดไฟล์ก่อนส่ง (เช่น 1200px)
+                        const MAX_WIDTH = 1200;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > MAX_WIDTH) {
+                            height = Math.floor(height * (MAX_WIDTH / width));
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // วาดภาพต้นฉบับ
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // วาดแถบดำโปร่งแสงด้านล่าง
+                        const barHeight = Math.max(100, height * 0.15); // สูงประมาณ 15% ของภาพ
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                        ctx.fillRect(0, height - barHeight, width, barHeight);
+
+                        // ตั้งค่าฟอนต์
+                        let fontSize = Math.floor(width * 0.035);
+                        ctx.font = `${fontSize}px 'Sarabun', sans-serif`;
+                        ctx.fillStyle = 'white';
+                        
+                        // เตรียมข้อความ
+                        const now = new Date();
+                        const timeStr = now.toLocaleDateString('th-TH') + " " + now.toLocaleTimeString('th-TH');
+                        const text1 = `วันที่/เวลา: ${timeStr}`;
+                        const text2 = `พิกัด (Lat, Long): ${currentLat}, ${currentLong}`;
+                        const text3 = `สถานที่: ${currentAddress}`;
+
+                        // คำนวณตำแหน่ง Y ให้อยู่ในแถบดำ
+                        const startY = height - barHeight + (fontSize * 1.5);
+                        const lineSpacing = fontSize * 1.5;
+
+                        // วาดข้อความ
+                        ctx.fillText(text1, 20, startY);
+                        ctx.fillText(text2, 20, startY + lineSpacing);
+                        ctx.fillText(text3, 20, startY + (lineSpacing * 2));
+
+                        // ดึง Base64 ออกมา (Quality 0.7 = 70%)
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // แสดง Preview และเก็บข้อมูล
+                        document.getElementById(previewId).src = dataUrl;
+                        document.getElementById(previewId).style.display = 'block';
+                        document.getElementById(dataId).value = dataUrl;
+
+                        document.getElementById('loadingOverlay').style.display = "none";
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ==========================================
+        // Keyboard Mode Toggle & Speech to Text
+        // ==========================================
+        function toggleInputMode(inputId, btn) {
+            const el = document.getElementById(inputId);
+            if (el.getAttribute('inputmode') === 'text') {
+                el.setAttribute('inputmode', 'numeric');
+                btn.innerHTML = '<i class="fa-solid fa-hashtag mr-2 text-xl"></i> แป้นตัวเลข';
+                Swal.fire({icon: 'info', title: 'เปลี่ยนเป็นแป้นตัวเลข', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false});
+            } else {
+                el.setAttribute('inputmode', 'text');
+                btn.innerHTML = '<i class="fa-solid fa-font mr-2 text-xl"></i> แป้นปกติ';
+                Swal.fire({icon: 'info', title: 'เปลี่ยนเป็นแป้นปกติ', toast: true, position: 'top-end', timer: 1500, showConfirmButton: false});
+            }
+            el.focus();
+        }
+
+        function startSpeechToText(inputId) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'th-TH'; // ภาษาไทย
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                const inputEl = document.getElementById(inputId);
+                
+                // Show recording indicator
+                Swal.fire({
+                    title: 'กำลังฟังเสียง...',
+                    text: 'กรุณาพูดสิ่งที่ต้องการพิมพ์',
+                    iconHtml: '<i class="fa-solid fa-microphone text-red-500 animate-pulse"></i>',
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    // นำข้อความที่พูดมาต่อท้ายข้อความเดิม
+                    inputEl.value = (inputEl.value + " " + transcript).trim();
+                    Swal.close();
+                };
+
+                recognition.onerror = function(event) {
+                    console.error(event.error);
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถรับฟังเสียงได้ กรุณาลองใหม่', 'error');
+                };
+
+                recognition.start();
+            } else {
+                Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์ของคุณไม่รองรับการพิมพ์ด้วยเสียง (แนะนำ Google Chrome)', 'warning');
+            }
+        }
+
+        // ==========================================
+        // Form Submission & Report Generation
+        // ==========================================
+        document.getElementById('mainForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // ตรวจสอบว่ากรอก URL ของ GAS หรือยัง
+            if(GAS_WEB_APP_URL.includes("...")) {
+                Swal.fire('ข้อผิดพลาด', 'ผู้ดูแลระบบยังไม่ได้ใส่ GAS_WEB_APP_URL ในโค้ด', 'error');
+                return;
+            }
+
+            const payload = {
+                team: document.querySelector('input[name="team"]:checked').value,
+                action: document.querySelector('input[name="action"]:checked').value,
+                latlong: document.getElementById('latlong').value,
+                address: document.getElementById('address').value,
+                img3: document.getElementById('dataImg3').value,
+                img4: document.getElementById('dataImg4').value,
+                descOld: document.getElementById('descOld').value,
+                img6: document.getElementById('dataImg6').value,
+                img7: document.getElementById('dataImg7').value,
+                descNew: document.getElementById('descNew').value,
+                remark: document.getElementById('remark').value
+            };
+
+            document.getElementById('loadingText').innerText = "กำลังบันทึกข้อมูลไปที่ระบบ...";
+            document.getElementById('loadingOverlay').style.display = "flex";
+
+            try {
+                // 1. ส่งข้อมูลไป Google Apps Script
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    // 2. สร้างภาพ Report ลงเครื่อง
+                    generateReport();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                document.getElementById('loadingOverlay').style.display = "none";
+                Swal.fire('เกิดข้อผิดพลาดในการบันทึก', error.toString(), 'error');
+            }
+        });
+
+        function generateReport() {
+            document.getElementById('loadingText').innerText = "กำลังสร้างรูปภาพรายงาน...";
+            const container = document.getElementById('appContainer');
+            
+            // ซ่อนปุ่มต่างๆ (เพิ่ม class exporting)
+            container.classList.add('exporting');
+            
+            // รอให้ DOM อัพเดต แล้วใช้ html2canvas
+            setTimeout(() => {
+                html2canvas(container, {
+                    scale: 2, // ความคมชัด
+                    useCORS: true,
+                    backgroundColor: "#ffffff"
+                }).then(canvas => {
+                    // คืนค่า UI กลับมา
+                    container.classList.remove('exporting');
+                    document.getElementById('loadingOverlay').style.display = "none";
+
+                    // ดาวน์โหลดภาพ
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL("image/jpeg", 0.9);
+                    a.download = `Report_Meter_${Date.now()}.jpg`;
+                    a.click();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกสำเร็จ!',
+                        text: 'ข้อมูลถูกส่งเข้า Sheet และ Drive แล้ว และสร้างภาพรายงานเรียบร้อย',
+                        confirmButtonText: 'ตกลง (รีเซ็ตฟอร์ม)'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload(); // รีเฟรชหน้าเพื่อเคลียร์ฟอร์ม
+                        }
+                    });
+                }).catch(err => {
+                    container.classList.remove('exporting');
+                    document.getElementById('loadingOverlay').style.display = "none";
+                    console.error(err);
+                    Swal.fire('ข้อผิดพลาด', 'บันทึกข้อมูลสำเร็จ แต่ไม่สามารถสร้างรูปภาพรายงานได้', 'warning');
+                });
+            }, 500);
+        }
+    </script>
+</body>
+</html>
