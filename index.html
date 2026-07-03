@@ -25,7 +25,7 @@
         /* Loading Overlay */
         #loadingOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); z-index: 9999;
+            background: rgba(255,255,255,0.95); z-index: 9999;
             display: none; flex-direction: column; justify-content: center; align-items: center;
         }
         .spinner {
@@ -130,26 +130,39 @@
                 
                 <div class="mb-4">
                     <label class="block font-semibold mb-1">หน่วยมิเตอร์เก่า (กิโลวัตต์ชั่วโมง) <span class="text-red-500">*</span></label>
-                    <input type="number" id="unitOld" required placeholder="ระบุตัวเลขหน่วยไฟ" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 text-lg font-bold text-red-700 bg-white">
+                    <!-- ใส่ inputmode="numeric" และ pattern="[0-9]*" เพื่อเด้งแป้นตัวเลข iOS -->
+                    <input type="number" id="unitOld" required inputmode="numeric" pattern="[0-9]*" placeholder="ระบุตัวเลขหน่วยไฟ" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 text-lg font-bold text-red-700 bg-white">
                 </div>
 
                 <div class="mb-4">
                     <label class="block font-semibold mb-1">3. ภาพหน้ามิเตอร์เก่า <span class="text-red-500">*</span></label>
-                    <input type="file" accept="image/*" id="fileImg3" class="hidden" onchange="processImage(this, 'preview3', 'dataImg3')">
+                    <input type="file" accept="image/*" id="fileImg3" class="hidden" onchange="processImage(this, 'preview3', 'dataImg3', 'container3')">
                     <button type="button" onclick="document.getElementById('fileImg3').click()" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-4 rounded-lg border-2 border-dashed border-red-400 shadow-sm active:scale-95 transition">
                         <i class="fa-solid fa-camera fa-2x mb-1 text-red-500 block"></i> ถ่ายภาพ / เลือกรูป
                     </button>
-                    <img id="preview3" class="mt-3 w-full rounded-lg hidden shadow-md border border-gray-200">
+                    <!-- Container สำหรับภาพและการลบ -->
+                    <div id="container3" class="relative mt-3 hidden">
+                        <img id="preview3" class="w-full rounded-lg shadow-md border border-gray-200">
+                        <button type="button" onclick="clearImage('3')" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white w-10 h-10 rounded-full shadow-lg border-2 border-white flex justify-center items-center">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                     <input type="hidden" id="dataImg3" required>
                 </div>
 
                 <div class="mb-4">
                     <label class="block font-semibold mb-1">4. ภาพบิล/มุมกว้าง (ถ้ามี)</label>
-                    <input type="file" accept="image/*" id="fileImg4" class="hidden" onchange="processImage(this, 'preview4', 'dataImg4')">
+                    <input type="file" accept="image/*" id="fileImg4" class="hidden" onchange="processImage(this, 'preview4', 'dataImg4', 'container4')">
                     <button type="button" onclick="document.getElementById('fileImg4').click()" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-3 rounded-lg border-2 border-dashed border-gray-300 shadow-sm active:scale-95 transition">
                         <i class="fa-solid fa-image mr-2 text-gray-500"></i> แนบภาพเพิ่มเติม
                     </button>
-                    <img id="preview4" class="mt-3 w-full rounded-lg hidden shadow-md border border-gray-200">
+                    <!-- Container สำหรับภาพและการลบ -->
+                    <div id="container4" class="relative mt-3 hidden">
+                        <img id="preview4" class="w-full rounded-lg shadow-md border border-gray-200">
+                        <button type="button" onclick="clearImage('4')" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white w-10 h-10 rounded-full shadow-lg border-2 border-white flex justify-center items-center">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                     <input type="hidden" id="dataImg4">
                 </div>
 
@@ -159,7 +172,7 @@
                         <textarea id="descOld" inputmode="text" rows="2" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 text-base bg-white" placeholder="อธิบายเพิ่มเติม..."></textarea>
                         <div class="flex justify-between space-x-2">
                             <button type="button" onclick="startSpeechToText('descOld')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
-                                <i class="fa-solid fa-microphone text-xl mr-2"></i> พูดข้อความ
+                                <i class="fa-solid fa-microphone text-xl mr-2"></i> พูด
                             </button>
                             <button type="button" onclick="toggleInputMode('descOld', this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                                 <i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์
@@ -175,26 +188,38 @@
                 
                 <div class="mb-4">
                     <label class="block font-semibold mb-1">หน่วยมิเตอร์ใหม่ (กิโลวัตต์ชั่วโมง) <span class="text-red-500">*</span></label>
-                    <input type="number" id="unitNew" required placeholder="ระบุตัวเลขหน่วยไฟ" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold text-green-700 bg-white">
+                    <input type="number" id="unitNew" required inputmode="numeric" pattern="[0-9]*" placeholder="ระบุตัวเลขหน่วยไฟ" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold text-green-700 bg-white">
                 </div>
 
                 <div class="mb-4">
                     <label class="block font-semibold mb-1">6. ภาพหน้ามิเตอร์ใหม่ <span class="text-red-500">*</span></label>
-                    <input type="file" accept="image/*" id="fileImg6" class="hidden" onchange="processImage(this, 'preview6', 'dataImg6')">
+                    <input type="file" accept="image/*" id="fileImg6" class="hidden" onchange="processImage(this, 'preview6', 'dataImg6', 'container6')">
                     <button type="button" onclick="document.getElementById('fileImg6').click()" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-4 rounded-lg border-2 border-dashed border-green-500 shadow-sm active:scale-95 transition">
                         <i class="fa-solid fa-camera fa-2x mb-1 text-green-600 block"></i> ถ่ายภาพ / เลือกรูป
                     </button>
-                    <img id="preview6" class="mt-3 w-full rounded-lg hidden shadow-md border border-gray-200">
+                    <!-- Container สำหรับภาพและการลบ -->
+                    <div id="container6" class="relative mt-3 hidden">
+                        <img id="preview6" class="w-full rounded-lg shadow-md border border-gray-200">
+                        <button type="button" onclick="clearImage('6')" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white w-10 h-10 rounded-full shadow-lg border-2 border-white flex justify-center items-center">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                     <input type="hidden" id="dataImg6" required>
                 </div>
 
                 <div class="mb-4">
                     <label class="block font-semibold mb-1">7. ภาพกล่อง/มุมกว้าง (ถ้ามี)</label>
-                    <input type="file" accept="image/*" id="fileImg7" class="hidden" onchange="processImage(this, 'preview7', 'dataImg7')">
+                    <input type="file" accept="image/*" id="fileImg7" class="hidden" onchange="processImage(this, 'preview7', 'dataImg7', 'container7')">
                     <button type="button" onclick="document.getElementById('fileImg7').click()" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-3 rounded-lg border-2 border-dashed border-gray-300 shadow-sm active:scale-95 transition">
                         <i class="fa-solid fa-image mr-2 text-gray-500"></i> แนบภาพเพิ่มเติม
                     </button>
-                    <img id="preview7" class="mt-3 w-full rounded-lg hidden shadow-md border border-gray-200">
+                    <!-- Container สำหรับภาพและการลบ -->
+                    <div id="container7" class="relative mt-3 hidden">
+                        <img id="preview7" class="w-full rounded-lg shadow-md border border-gray-200">
+                        <button type="button" onclick="clearImage('7')" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white w-10 h-10 rounded-full shadow-lg border-2 border-white flex justify-center items-center">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                     <input type="hidden" id="dataImg7">
                 </div>
 
@@ -204,7 +229,7 @@
                         <textarea id="descNew" inputmode="text" rows="2" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 text-base bg-white" placeholder="อธิบายเพิ่มเติม..."></textarea>
                         <div class="flex justify-between space-x-2">
                             <button type="button" onclick="startSpeechToText('descNew')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
-                                <i class="fa-solid fa-microphone text-xl mr-2"></i> พูดข้อความ
+                                <i class="fa-solid fa-microphone text-xl mr-2"></i> พูด
                             </button>
                             <button type="button" onclick="toggleInputMode('descNew', this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                                 <i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์
@@ -221,7 +246,7 @@
                     <textarea id="remark" inputmode="text" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-base" placeholder="ปัญหาหน้างาน หรืออื่นๆ..."></textarea>
                     <div class="flex justify-between space-x-2">
                         <button type="button" onclick="startSpeechToText('remark')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
-                            <i class="fa-solid fa-microphone text-xl mr-2"></i> พูดข้อความ
+                            <i class="fa-solid fa-microphone text-xl mr-2"></i> พูด
                         </button>
                         <button type="button" onclick="toggleInputMode('remark', this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                             <i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์
@@ -230,16 +255,30 @@
                 </div>
             </div>
 
-            <!-- 10. Submit Button -->
-            <div class="pt-2 pb-6">
-                <button type="submit" id="submitBtn" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-4 rounded-xl shadow-lg text-xl flex justify-center items-center transition active:scale-95">
-                    <i class="fa-solid fa-cloud-arrow-up mr-3 text-2xl"></i> บันทึกใบงานและส่งข้อมูล
+            <!-- 10. Submit Buttons (Separated Logic) -->
+            <div class="pt-2 pb-6 space-y-3">
+                <button type="button" onclick="generatePreviewReport()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow border border-orange-600 text-lg flex justify-center items-center transition active:scale-95">
+                    <i class="fa-solid fa-file-image mr-3 text-xl"></i> ดูตัวอย่างรายงาน (เพื่อเซฟรูป)
+                </button>
+                <button type="submit" id="submitBtn" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-4 rounded-xl shadow-lg text-xl flex justify-center items-center transition active:scale-95 mt-4">
+                    <i class="fa-solid fa-cloud-arrow-up mr-3 text-2xl"></i> บันทึกข้อมูลเข้าเซิร์ฟเวอร์
                 </button>
             </div>
             
         </form>
     </div>
     
+    <!-- Modal แสดงรูปรายงานให้เซฟ -->
+    <div id="previewModal" class="fixed inset-0 bg-black/90 z-[10000] hidden flex-col items-center p-4 overflow-y-auto">
+        <div class="flex justify-between items-center w-full max-w-2xl mb-4 sticky top-0 bg-black/90 p-2 z-10">
+            <p class="text-white font-bold text-sm bg-blue-600 px-3 py-1 rounded-full animate-pulse"><i class="fa-solid fa-hand-pointer mr-2"></i>แตะค้างที่รูปภาพเพื่อบันทึก</p>
+            <button type="button" onclick="document.getElementById('previewModal').style.display='none'" class="text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold shadow-lg">
+                ปิดหน้าต่าง
+            </button>
+        </div>
+        <img id="finalReportImage" class="w-full max-w-2xl bg-white rounded-lg shadow-2xl mb-10" alt="Report Preview">
+    </div>
+
     <!-- Canvas for Image Processing (Hidden) -->
     <canvas id="canvas" style="display:none;"></canvas>
 
@@ -302,7 +341,7 @@
 
     <script>
         // ==========================================
-        // 1. ตั้งค่า URL ของ Google Apps Script ที่นี่ (อย่าลืมเอาอันใหม่มาใส่นะครับ)
+        // 1. ตั้งค่า URL ของ Google Apps Script ที่นี่
         // ==========================================
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzO6WWxZOxXIxlzMUFKJRPHpD2JgFQtPBIkWd0_5ms9R1NNMzMITfu6ZYbO-bJ1HyOMhA/exec'; 
         
@@ -320,7 +359,6 @@
         function updateNetworkStatus() {
             isOnline = navigator.onLine;
             const statusDiv = document.getElementById('networkStatus');
-            const statusText = document.getElementById('statusText');
             const submitBtn = document.getElementById('submitBtn');
 
             if (isOnline) {
@@ -336,7 +374,6 @@
                 Swal.fire({icon: 'warning', title: 'ไม่มีสัญญาณอินเทอร์เน็ต', text: 'ระบบจะส่งข้อมูลไม่ได้จนกว่าจะเชื่อมต่อเน็ตอีกครั้ง', toast: true, position: 'top', timer: 3000, showConfirmButton: false});
             }
         }
-        // รันครั้งแรกตอนเปิดหน้าเว็บ
         updateNetworkStatus();
 
         // ==========================================
@@ -370,7 +407,6 @@
                 currentAddress = addrText.trim() || (data.display_name ? data.display_name.substring(0, 50) : "ไม่ระบุ");
                 document.getElementById('address').value = currentAddress;
             } catch (error) {
-                console.error("Address fetch failed:", error);
                 currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
                 document.getElementById('address').value = currentAddress;
             }
@@ -416,9 +452,9 @@
         }
 
         // ==========================================
-        // Image Processing & Stamping
+        // Image Processing, Stamping & Clearing
         // ==========================================
-        function processImage(input, previewId, dataId) {
+        function processImage(input, previewId, dataId, containerId) {
             if (input.files && input.files[0]) {
                 if(!currentLat) {
                     Swal.fire('แจ้งเตือน', 'กรุณากดโหลดพิกัดแผนที่ก่อนแนบภาพ เพื่อประทับข้อมูล', 'warning');
@@ -439,7 +475,6 @@
                         const canvas = document.getElementById('canvas');
                         const ctx = canvas.getContext('2d');
 
-                        // ลดขนาดภาพลงเพื่อส่งไวขึ้น (Max 900px)
                         const MAX_WIDTH = 900;
                         let width = img.width;
                         let height = img.height;
@@ -453,19 +488,16 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // แถบดำโปร่งแสง
                         const barHeight = Math.max(80, height * 0.15);
                         ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
                         ctx.fillRect(0, height - barHeight, width, barHeight);
 
-                        // ข้อความ Stamp
                         let fontSize = Math.floor(width * 0.035);
                         ctx.font = `${fontSize}px 'Sarabun', sans-serif`;
                         ctx.fillStyle = 'white';
                         
                         const now = new Date();
                         const timeStr = now.toLocaleDateString('th-TH') + " " + now.toLocaleTimeString('th-TH');
-                        
                         const startY = height - barHeight + (fontSize * 1.5);
                         const lineSpacing = fontSize * 1.5;
 
@@ -473,11 +505,10 @@
                         ctx.fillText(`GPS: ${currentLat}, ${currentLong}`, 15, startY + lineSpacing);
                         ctx.fillText(`สถานที่: ${currentAddress}`, 15, startY + (lineSpacing * 2));
 
-                        // ดึง Base64 (Quality 0.6 = 60% ช่วยให้ส่งไวมาก)
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                         
                         document.getElementById(previewId).src = dataUrl;
-                        document.getElementById(previewId).style.display = 'block';
+                        document.getElementById(containerId).classList.remove('hidden');
                         document.getElementById(dataId).value = dataUrl;
 
                         document.getElementById('loadingOverlay').style.display = "none";
@@ -486,6 +517,13 @@
                 }
                 reader.readAsDataURL(file);
             }
+        }
+
+        function clearImage(numId) {
+            document.getElementById(`fileImg${numId}`).value = "";
+            document.getElementById(`dataImg${numId}`).value = "";
+            document.getElementById(`preview${numId}`).src = "";
+            document.getElementById(`container${numId}`).classList.add('hidden');
         }
 
         // ==========================================
@@ -530,124 +568,134 @@
                 };
                 recognition.start();
             } else {
-                Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์ไม่รองรับการพิมพ์ด้วยเสียง (แนะนำ Chrome)', 'warning');
+                Swal.fire('ข้อผิดพลาด', 'เบราว์เซอร์ไม่รองรับการพิมพ์ด้วยเสียง', 'warning');
             }
         }
 
         // ==========================================
-        // Report Generation (A4) & Form Submit
+        // Logic 1: สร้างรูปตัวอย่างให้บันทึกลงเครื่อง (Preview)
         // ==========================================
-        document.getElementById('mainForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if(GAS_WEB_APP_URL.includes("...")) {
-                Swal.fire('ข้อผิดพลาด', 'อย่าลืมใส่ URL ของ GAS ในโค้ด HTML บรรทัดบนๆ ด้วยครับ', 'error');
+        async function generatePreviewReport() {
+            const form = document.getElementById('mainForm');
+            if (!form.checkValidity()) {
+                form.reportValidity(); // บังคับให้เบราว์เซอร์แจ้งเตือนช่องที่ยังไม่กรอก
                 return;
             }
-
-            // 1. เตรียมข้อมูลลง A4 Template
-            const team = document.querySelector('input[name="team"]:checked').value;
-            const action = document.querySelector('input[name="action"]:checked').value;
             
-            document.getElementById('a4Team').innerText = team;
-            document.getElementById('a4Action').innerText = action;
+            // เตรียมข้อมูลลง A4
+            const teamInput = document.querySelector('input[name="team"]:checked');
+            const actionInput = document.querySelector('input[name="action"]:checked');
+            document.getElementById('a4Team').innerText = teamInput ? teamInput.value : "-";
+            document.getElementById('a4Action').innerText = actionInput ? actionInput.value : "-";
             document.getElementById('a4DateTime').innerText = new Date().toLocaleString('th-TH');
             document.getElementById('a4Address').innerText = document.getElementById('address').value;
             document.getElementById('a4LatLong').innerText = document.getElementById('latlong').value;
-            
             document.getElementById('a4UnitOld').innerText = document.getElementById('unitOld').value;
             document.getElementById('a4DescOld').innerText = document.getElementById('descOld').value || "-";
             document.getElementById('a4UnitNew').innerText = document.getElementById('unitNew').value;
             document.getElementById('a4DescNew').innerText = document.getElementById('descNew').value || "-";
             document.getElementById('a4Remark').innerText = document.getElementById('remark').value || "-";
 
-            // ย้ายรูปภาพไปแสดงใน A4
             function syncImg(previewId, a4Id) {
                 const src = document.getElementById(previewId).src;
                 const a4Img = document.getElementById(a4Id);
                 if(src && src !== window.location.href) {
-                    a4Img.src = src;
-                    a4Img.style.display = 'block';
-                } else {
-                    a4Img.style.display = 'none';
-                }
+                    a4Img.src = src; a4Img.style.display = 'block';
+                } else { a4Img.style.display = 'none'; }
             }
-            syncImg('preview3', 'a4Img3');
-            syncImg('preview4', 'a4Img4');
-            syncImg('preview6', 'a4Img6');
-            syncImg('preview7', 'a4Img7');
+            syncImg('preview3', 'a4Img3'); syncImg('preview4', 'a4Img4');
+            syncImg('preview6', 'a4Img6'); syncImg('preview7', 'a4Img7');
 
-            // แสดงหน้าจอโหลด
-            document.getElementById('loadingText').innerText = "ขั้นตอนที่ 1/2: กำลังสร้างใบรายงาน A4...";
-            document.getElementById('loadingSubtext').innerText = "กรุณารอสักครู่ ห้ามปิดหน้าจอ";
+            document.getElementById('loadingText').innerText = "กำลังสร้างรูปภาพรายงาน...";
+            document.getElementById('loadingSubtext').innerText = "รอสักครู่...";
             document.getElementById('loadingOverlay').style.display = "flex";
 
-            // ย้ายแผนที่ไปใส่ใน A4 ชั่วคราวเพื่อแคปภาพ
+            // ย้ายแผนที่ไป A4
             const mapDom = document.getElementById('mapContainer');
             const mapTarget = document.getElementById('a4MapTarget');
             const originalSlot = document.getElementById('originalMapSlot');
-            mapTarget.appendChild(mapDom);
-            if(map) map.invalidateSize(); // ให้แผนที่ปรับขนาดเข้ากับกล่องใหม่
+            if(mapDom && mapTarget) {
+                mapTarget.appendChild(mapDom);
+                if(map) map.invalidateSize();
+            }
 
-            // รอแผนที่โหลดนิดนึง แล้วแคปภาพ
             setTimeout(async () => {
                 try {
-                    // แคปภาพ A4
                     const a4Wrapper = document.getElementById('a4Report');
                     const canvas = await html2canvas(a4Wrapper, { scale: 1.5, useCORS: true, backgroundColor: "#ffffff" });
+                    const finalImgData = canvas.toDataURL("image/jpeg", 0.9);
                     
-                    // ดาวน์โหลดรูปลงเครื่องทันที
-                    const a = document.createElement('a');
-                    a.href = canvas.toDataURL("image/jpeg", 0.9);
-                    a.download = `Report_${Date.now()}.jpg`;
-                    a.click();
-
+                    // นำรูปไปใส่ใน Modal
+                    document.getElementById('finalReportImage').src = finalImgData;
+                    
                     // ย้ายแผนที่กลับที่เดิม
-                    originalSlot.appendChild(mapDom);
-                    if(map) map.invalidateSize();
-
-                    // 2. ส่งข้อมูลขึ้นเซิร์ฟเวอร์
-                    document.getElementById('loadingText').innerText = "ขั้นตอนที่ 2/2: ส่งข้อมูลเข้า Google Sheet";
-                    document.getElementById('loadingSubtext').innerText = "กำลังอัปโหลดรูปภาพเข้า Drive...";
-
-                    const payload = {
-                        team: team, action: action,
-                        latlong: document.getElementById('latlong').value,
-                        address: document.getElementById('address').value,
-                        unitOld: document.getElementById('unitOld').value,
-                        img3: document.getElementById('dataImg3').value,
-                        img4: document.getElementById('dataImg4').value,
-                        descOld: document.getElementById('descOld').value,
-                        unitNew: document.getElementById('unitNew').value,
-                        img6: document.getElementById('dataImg6').value,
-                        img7: document.getElementById('dataImg7').value,
-                        descNew: document.getElementById('descNew').value,
-                        remark: document.getElementById('remark').value
-                    };
-
-                    const response = await fetch(GAS_WEB_APP_URL, {
-                        method: 'POST', body: JSON.stringify(payload)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    document.getElementById('loadingOverlay').style.display = "none";
-                    if (result.status === "success") {
-                        Swal.fire({
-                            icon: 'success', title: 'สำเร็จ!',
-                            html: 'รูปภาพรายงานถูกเซฟลงเครื่องแล้ว<br>และข้อมูลส่งเข้าเซิร์ฟเวอร์เรียบร้อย',
-                            confirmButtonText: 'ตกลง (รีเซ็ตฟอร์ม)'
-                        }).then(() => window.location.reload());
-                    } else {
-                        throw new Error(result.message);
+                    if(mapDom && originalSlot) {
+                        originalSlot.appendChild(mapDom);
+                        if(map) map.invalidateSize();
                     }
-                } catch (error) {
+                    
                     document.getElementById('loadingOverlay').style.display = "none";
-                    // ถ้าย้ายแผนที่พลาด ให้ย้ายกลับ
-                    originalSlot.appendChild(mapDom); 
-                    Swal.fire('ข้อผิดพลาด', 'อาจเกิดจากอินเทอร์เน็ตหลุดระหว่างส่ง หรือ ' + error.toString(), 'error');
+                    document.getElementById('previewModal').style.display = "flex";
+
+                } catch (error) {
+                    if(mapDom && originalSlot) originalSlot.appendChild(mapDom);
+                    document.getElementById('loadingOverlay').style.display = "none";
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถสร้างรูปภาพได้: ' + error.message, 'error');
                 }
-            }, 800); // ดีเลย์ให้แผนที่โหลดเสร็จ
+            }, 800);
+        }
+
+        // ==========================================
+        // Logic 2: ส่งข้อมูลเข้า Server (Submit)
+        // ==========================================
+        document.getElementById('mainForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if(GAS_WEB_APP_URL.includes("...")) {
+                Swal.fire('ข้อผิดพลาด', 'ยังไม่ได้ใส่ URL ของ Google Apps Script ในโค้ด', 'error');
+                return;
+            }
+
+            document.getElementById('loadingText').innerText = "กำลังส่งข้อมูลเข้าสู่ระบบ...";
+            document.getElementById('loadingSubtext').innerText = "กรุณารอสักครู่ ห้ามปิดหน้าจอ";
+            document.getElementById('loadingOverlay').style.display = "flex";
+
+            const payload = {
+                team: document.querySelector('input[name="team"]:checked').value, 
+                action: document.querySelector('input[name="action"]:checked').value,
+                latlong: document.getElementById('latlong').value,
+                address: document.getElementById('address').value,
+                unitOld: document.getElementById('unitOld').value,
+                img3: document.getElementById('dataImg3').value,
+                img4: document.getElementById('dataImg4').value,
+                descOld: document.getElementById('descOld').value,
+                unitNew: document.getElementById('unitNew').value,
+                img6: document.getElementById('dataImg6').value,
+                img7: document.getElementById('dataImg7').value,
+                descNew: document.getElementById('descNew').value,
+                remark: document.getElementById('remark').value
+            };
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                
+                document.getElementById('loadingOverlay').style.display = "none";
+                if (result.status === "success") {
+                    Swal.fire({
+                        icon: 'success', title: 'ส่งข้อมูลสำเร็จ!',
+                        text: 'ข้อมูลเข้า Google Sheet และ Drive เรียบร้อยแล้ว',
+                        confirmButtonText: 'ตกลง (รีเซ็ตฟอร์ม)'
+                    }).then(() => window.location.reload());
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                document.getElementById('loadingOverlay').style.display = "none";
+                Swal.fire('ข้อผิดพลาด', 'การส่งข้อมูลล้มเหลว โปรดตรวจสอบอินเทอร์เน็ต: ' + error.toString(), 'error');
+            }
         });
     </script>
 </body>
