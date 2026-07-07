@@ -415,16 +415,17 @@
 
         async function fetchAddressData(lat, lng) {
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                // เพิ่ม &accept-language=th เพื่อบังคับขอภาษาไทยเป็นอันดับแรก
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=th`);
                 const data = await response.json();
                 
-                let addr = data.address || {};
-                let addrText = "";
-                if(addr.village || addr.suburb || addr.neighbourhood) addrText += (addr.village || addr.suburb || addr.neighbourhood) + " ";
-                if(addr.town || addr.city || addr.county) addrText += "ต." + (addr.town || addr.city || addr.county) + " ";
-                if(addr.state) addrText += "จ." + addr.state;
+                // ใช้ display_name ซึ่งเป็นที่อยู่แบบเต็มที่ API ดึงมาให้ทั้งหมด
+                if (data && data.display_name) {
+                    currentAddress = data.display_name;
+                } else {
+                    currentAddress = "ไม่พบข้อมูลที่อยู่บริเวณนี้";
+                }
                 
-                currentAddress = addrText.trim() || (data.display_name ? data.display_name.substring(0, 50) : "ไม่ระบุ");
                 document.getElementById('address').value = currentAddress;
             } catch (error) {
                 currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
