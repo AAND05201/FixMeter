@@ -29,7 +29,7 @@
             display: none; flex-direction: column; justify-content: center; align-items: center;
         }
         .spinner {
-            border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6;
+            border: 4px solid #f3f3f3; border-top: 4px solid #7e22ce;
             border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -56,7 +56,7 @@
 
     <div id="loadingOverlay">
         <div class="spinner mb-4"></div>
-        <p class="text-xl font-bold text-blue-600 text-center px-4" id="loadingText">กำลังประมวลผล...</p>
+        <p class="text-xl font-bold text-purple-600 text-center px-4" id="loadingText">กำลังประมวลผล...</p>
         <p class="text-sm text-gray-500 mt-2 text-center" id="loadingSubtext"></p>
     </div>
 
@@ -68,41 +68,41 @@
     <!-- MAIN CONTAINER -->
     <div class="max-w-2xl mx-auto bg-white min-h-screen shadow-lg relative" id="appContainer">
         
-        <header class="bg-blue-700 text-white p-4 shadow-md">
+        <header class="bg-purple-700 text-white p-4 shadow-md">
             <h1 class="text-xl font-bold text-center"><i class="fa-solid fa-bolt mr-2"></i>บันทึกงานสับเปลี่ยนมิเตอร์</h1>
         </header>
 
         <form id="mainForm" class="p-5 space-y-6">
             
             <!-- 0. ทีมปฏิบัติงาน -->
-            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <div class="bg-purple-50 p-4 rounded-xl border border-purple-200">
                 <label class="block font-semibold mb-2 text-lg">0. ทีมปฏิบัติงาน <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-3 gap-2">
-                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-blue-100 transition">
-                        <input type="radio" name="team" value="ทีมแก้ไฟ" required class="text-blue-600 w-5 h-5">
+                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-purple-100 transition">
+                        <input type="radio" name="team" value="ทีมแก้ไฟ" required class="text-purple-600 w-5 h-5">
                         <span class="font-medium">ทีมแก้ไฟ</span>
                     </label>
-                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-blue-100 transition">
-                        <input type="radio" name="team" value="ทีมงานมิเตอร์" class="text-blue-600 w-5 h-5">
+                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-purple-100 transition">
+                        <input type="radio" name="team" value="ทีมงานมิเตอร์" class="text-purple-600 w-5 h-5">
                         <span class="font-medium">งานมิเตอร์</span>
                     </label>
-                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-blue-100 transition">
-                        <input type="radio" name="team" value="ลุงกบ" class="text-blue-600 w-5 h-5">
+                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-purple-100 transition">
+                        <input type="radio" name="team" value="ลุงกบ" class="text-purple-600 w-5 h-5">
                         <span class="font-medium">ลุงกบ</span>
                     </label>
                 </div>
             </div>
 
             <!-- 1. การดำเนินการ -->
-            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <div class="bg-purple-50 p-4 rounded-xl border border-purple-200">
                 <label class="block font-semibold mb-2 text-lg">1. การดำเนินการ <span class="text-red-500">*</span></label>
                 <div class="grid grid-cols-2 gap-2">
-                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-blue-100 transition">
-                        <input type="radio" name="action" value="สับเปลี่ยนมิเตอร์" required class="text-blue-600 w-5 h-5">
+                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-purple-100 transition">
+                        <input type="radio" name="action" value="สับเปลี่ยนมิเตอร์" required class="text-purple-600 w-5 h-5">
                         <span class="font-medium">สับเปลี่ยนมิเตอร์</span>
                     </label>
-                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-blue-100 transition">
-                        <input type="radio" name="action" value="ต่อตรง" class="text-blue-600 w-5 h-5">
+                    <label class="flex items-center space-x-2 bg-white p-3 rounded-lg border cursor-pointer hover:bg-purple-100 transition">
+                        <input type="radio" name="action" value="ต่อตรง" class="text-purple-600 w-5 h-5">
                         <span class="font-medium">ต่อตรง</span>
                     </label>
                 </div>
@@ -120,7 +120,7 @@
                 <div id="originalMapSlot">
                     <div id="mapContainer" class="w-full h-48 rounded border shadow-inner mb-2" style="display: none; z-index: 1;"></div>
                 </div>
-                <p id="mapInstruction" class="text-sm text-blue-600 mb-2 font-medium" style="display: none;"><i class="fa-solid fa-hand-pointer mr-1"></i> แตะเลื่อนหมุดสีน้ำเงิน เพื่อปรับตำแหน่งให้ตรงได้</p>
+                <p id="mapInstruction" class="text-sm text-purple-600 mb-2 font-medium" style="display: none;"><i class="fa-solid fa-hand-pointer mr-1"></i> แตะเลื่อนหมุดสีน้ำเงิน เพื่อปรับตำแหน่งให้ตรงได้</p>
                 <p id="geoWarning" class="text-sm text-red-500 mt-1 font-semibold">** กรุณาโหลดพิกัดก่อนถ่ายรูป เพื่อประทับตำแหน่งบนภาพ **</p>
             </div>
 
@@ -129,9 +129,8 @@
                 <h3 class="text-xl font-bold text-red-700 mb-4 border-b-2 border-red-200 pb-2"><i class="fa-solid fa-arrow-down mr-2"></i>มิเตอร์เครื่องเก่า (ถอด)</h3>
                 
                 <div class="mb-4">
-                    <label class="block font-semibold mb-1">หน่วยมิเตอร์เก่า (กิโลวัตต์ชั่วโมง) <span class="text-red-500">*</span></label>
-                    <!-- ใส่ inputmode="numeric" และ pattern="[0-9]*" เพื่อเด้งแป้นตัวเลข iOS -->
-                    <input type="number" id="unitOld" required inputmode="numeric" pattern="[0-9]*" placeholder="ระบุตัวเลขหน่วยไฟ" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 text-lg font-bold text-red-700 bg-white">
+                    <label class="block font-semibold mb-1">หน่วยมิเตอร์เก่า (กิโลวัตต์ชั่วโมง)</label>
+                    <input type="number" id="unitOld" inputmode="numeric" pattern="[0-9]*" placeholder="ระบุตัวเลขหน่วยไฟ (ระบุหรือไม่ก็ได้)" class="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 text-lg font-bold text-red-700 bg-white">
                 </div>
 
                 <div class="mb-4">
@@ -174,7 +173,7 @@
                             <button type="button" onclick="startSpeechToText('descOld')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                                 <i class="fa-solid fa-microphone text-xl mr-2"></i> พูด
                             </button>
-                            <button type="button" onclick="toggleInputMode('descOld', this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
+                            <button type="button" onclick="toggleInputMode('descOld', this)" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                                 <i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์
                             </button>
                         </div>
@@ -187,8 +186,8 @@
                 <h3 class="text-xl font-bold text-green-700 mb-4 border-b-2 border-green-200 pb-2"><i class="fa-solid fa-arrow-up mr-2"></i>มิเตอร์เครื่องใหม่ (ติดตั้ง)</h3>
                 
                 <div class="mb-4">
-                    <label class="block font-semibold mb-1">หน่วยมิเตอร์ใหม่ (กิโลวัตต์ชั่วโมง) <span class="text-red-500">*</span></label>
-                    <input type="number" id="unitNew" required inputmode="numeric" pattern="[0-9]*" placeholder="ระบุตัวเลขหน่วยไฟ" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold text-green-700 bg-white">
+                    <label class="block font-semibold mb-1">หน่วยมิเตอร์ใหม่ (กิโลวัตต์ชั่วโมง)</label>
+                    <input type="number" id="unitNew" inputmode="numeric" pattern="[0-9]*" placeholder="ระบุตัวเลขหน่วยไฟ (ระบุหรือไม่ก็ได้)" class="w-full p-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 text-lg font-bold text-green-700 bg-white">
                 </div>
 
                 <div class="mb-4">
@@ -231,7 +230,7 @@
                             <button type="button" onclick="startSpeechToText('descNew')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                                 <i class="fa-solid fa-microphone text-xl mr-2"></i> พูด
                             </button>
-                            <button type="button" onclick="toggleInputMode('descNew', this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
+                            <button type="button" onclick="toggleInputMode('descNew', this)" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                                 <i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์
                             </button>
                         </div>
@@ -243,24 +242,24 @@
             <div class="p-4 rounded-xl border border-gray-300 bg-white shadow-sm">
                 <label class="block font-semibold mb-2 text-lg">9. หมายเหตุเพิ่มเติม</label>
                 <div class="flex flex-col space-y-2">
-                    <textarea id="remark" inputmode="text" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-base" placeholder="ปัญหาหน้างาน หรืออื่นๆ..."></textarea>
+                    <textarea id="remark" inputmode="text" rows="2" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-base" placeholder="ปัญหาหน้างาน หรืออื่นๆ..."></textarea>
                     <div class="flex justify-between space-x-2">
                         <button type="button" onclick="startSpeechToText('remark')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                             <i class="fa-solid fa-microphone text-xl mr-2"></i> พูด
                         </button>
-                        <button type="button" onclick="toggleInputMode('remark', this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
+                        <button type="button" onclick="toggleInputMode('remark', this)" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg shadow active:scale-95 transition flex justify-center items-center font-bold">
                             <i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 10. Submit Buttons (Separated Logic) -->
+            <!-- 10. Submit Buttons -->
             <div class="pt-2 pb-6 space-y-3">
                 <button type="button" onclick="generatePreviewReport()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow border border-orange-600 text-lg flex justify-center items-center transition active:scale-95">
                     <i class="fa-solid fa-file-image mr-3 text-xl"></i> ดูตัวอย่างรายงาน (เพื่อเซฟรูป)
                 </button>
-                <button type="submit" id="submitBtn" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-4 rounded-xl shadow-lg text-xl flex justify-center items-center transition active:scale-95 mt-4">
+                <button type="submit" id="submitBtn" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-4 px-4 rounded-xl shadow-lg text-xl flex justify-center items-center transition active:scale-95 mt-4">
                     <i class="fa-solid fa-cloud-arrow-up mr-3 text-2xl"></i> บันทึกข้อมูลเข้าเซิร์ฟเวอร์
                 </button>
             </div>
@@ -268,15 +267,21 @@
         </form>
     </div>
     
-    <!-- Modal แสดงรูปรายงานให้เซฟ -->
+    <!-- Modal แสดงรูปรายงานให้เซฟ พร้อมปุ่มดาวน์โหลดเสริมกรณี แตะค้างไม่ได้ -->
     <div id="previewModal" class="fixed inset-0 bg-black/90 z-[10000] hidden flex-col items-center p-4 overflow-y-auto">
-        <div class="flex justify-between items-center w-full max-w-2xl mb-4 sticky top-0 bg-black/90 p-2 z-10">
-            <p class="text-white font-bold text-sm bg-blue-600 px-3 py-1 rounded-full animate-pulse"><i class="fa-solid fa-hand-pointer mr-2"></i>แตะค้างที่รูปภาพเพื่อบันทึก</p>
-            <button type="button" onclick="document.getElementById('previewModal').style.display='none'" class="text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-bold shadow-lg">
-                ปิดหน้าต่าง
-            </button>
+        <div class="flex justify-between items-center w-full max-w-2xl mb-4 sticky top-0 bg-black/90 p-2 z-10 gap-2">
+            <p class="text-white font-bold text-xs bg-purple-600 px-3 py-1.5 rounded-full animate-pulse flex-1 text-center"><i class="fa-solid fa-hand-pointer mr-1"></i>แตะค้างที่รูปภาพเพื่อบันทึก</p>
+            <div class="flex space-x-2">
+                <a id="downloadReportBtn" href="#" download="รายงานสับเปลี่ยนมิเตอร์.jpg" class="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg font-bold shadow-lg text-sm flex items-center transition active:scale-95">
+                    <i class="fa-solid fa-download mr-1"></i> ดาวน์โหลดรูป
+                </a>
+                <button type="button" onclick="document.getElementById('previewModal').style.display='none'" class="text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg font-bold shadow-lg text-sm">
+                    ปิด
+                </button>
+            </div>
         </div>
-        <img id="finalReportImage" class="w-full max-w-2xl bg-white rounded-lg shadow-2xl mb-10" alt="Report Preview">
+        <!-- ใส่ Inline CSS เพื่อแก้ปัญหา Long Press ไม่ทำงานในเบราว์เซอร์โมบายบางตัว -->
+        <img id="finalReportImage" class="w-full max-w-2xl bg-white rounded-lg shadow-2xl mb-10 select-all" style="-webkit-touch-callout: default !important; -webkit-user-select: auto !important; user-select: auto !important; pointer-events: auto !important;" alt="Report Preview">
     </div>
 
     <!-- Canvas for Image Processing (Hidden) -->
@@ -286,11 +291,11 @@
     <div id="a4Wrapper">
         <div id="a4Report">
             <!-- Header A4 -->
-            <div class="flex justify-between items-start border-b-4 border-blue-800 pb-4 mb-6">
+            <div class="flex justify-between items-start border-b-4 border-purple-800 pb-4 mb-6">
                 <div class="flex-1 pr-4">
-                    <h1 class="text-3xl font-extrabold text-blue-900 mb-4">รายงานงานสับเปลี่ยนมิเตอร์</h1>
+                    <h1 class="text-3xl font-extrabold text-purple-900 mb-4">รายงานงานสับเปลี่ยนมิเตอร์</h1>
                     <table class="w-full text-lg">
-                        <tr><td class="font-bold w-32 py-1">ทีมปฏิบัติงาน:</td><td id="a4Team" class="text-blue-700 font-semibold"></td></tr>
+                        <tr><td class="font-bold w-32 py-1">ทีมปฏิบัติงาน:</td><td id="a4Team" class="text-purple-700 font-semibold"></td></tr>
                         <tr><td class="font-bold py-1">การดำเนินการ:</td><td id="a4Action"></td></tr>
                         <tr><td class="font-bold py-1">วัน-เวลา:</td><td id="a4DateTime"></td></tr>
                         <tr><td class="font-bold py-1 align-top">สถานที่:</td><td id="a4Address" class="text-sm"></td></tr>
@@ -340,9 +345,9 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. ตั้งค่า URL ของ Google Apps Script ที่นี่
-        // ==========================================
+        // =========================================================
+        // 1. ตั้งค่า URL ของ Google Apps Script (GAS) เก่าของคุณที่นี่ได้เลย
+        // =========================================================
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzO6WWxZOxXIxlzMUFKJRPHpD2JgFQtPBIkWd0_5ms9R1NNMzMITfu6ZYbO-bJ1HyOMhA/exec'; 
         
         let currentLat = "";
@@ -423,7 +428,8 @@
             document.getElementById('mapInstruction').style.display = 'block';
 
             if (!map) {
-                map = L.map('mapContainer').setView([currentLat, currentLong], 17);
+                // แก้ไขข้อที่ 1: ปรับ Zoom ลงจาก 15 เหลือ 13 เพื่อให้ซูมออกเห็นพื้นที่รอบข้างกว้างขึ้น
+                map = L.map('mapContainer').setView([currentLat, currentLong], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM' }).addTo(map);
                 marker = L.marker([currentLat, currentLong], { draggable: true }).addTo(map);
 
@@ -435,7 +441,7 @@
                     fetchAddressData(currentLat, currentLong);
                 });
             } else {
-                map.setView([currentLat, currentLong], 17);
+                map.setView([currentLat, currentLong], 13);
                 marker.setLatLng([currentLat, currentLong]);
             }
             
@@ -457,7 +463,7 @@
         function processImage(input, previewId, dataId, containerId) {
             if (input.files && input.files[0]) {
                 if(!currentLat) {
-                    Swal.fire('แจ้งเตือน', 'กรุณากดโหลดพิกัดแผนที่ก่อนแนบภาพ เพื่อประทับข้อมูล', 'warning');
+                    Swal.fire('แจ้งเตือน', 'กรุณากดย้อนกระบวนการเพื่อโหลดพิกัดก่อนแนบภาพ เพื่อใช้ประทับข้อมูลพิกัดลงภาพ', 'warning');
                     input.value = ""; 
                     return;
                 }
@@ -534,11 +540,11 @@
             if (el.getAttribute('inputmode') === 'text' || !el.getAttribute('inputmode')) {
                 el.setAttribute('inputmode', 'numeric');
                 btn.innerHTML = '<i class="fa-solid fa-hashtag text-xl mr-2"></i> แป้นตัวเลข';
-                btn.classList.replace('bg-blue-600', 'bg-indigo-600');
+                btn.classList.replace('bg-purple-600', 'bg-indigo-600');
             } else {
                 el.setAttribute('inputmode', 'text');
                 btn.innerHTML = '<i class="fa-solid fa-keyboard text-xl mr-2"></i> แป้นพิมพ์';
-                btn.classList.replace('bg-indigo-600', 'bg-blue-600');
+                btn.classList.replace('bg-indigo-600', 'bg-purple-600');
             }
             el.focus();
         }
@@ -578,11 +584,11 @@
         async function generatePreviewReport() {
             const form = document.getElementById('mainForm');
             if (!form.checkValidity()) {
-                form.reportValidity(); // บังคับให้เบราว์เซอร์แจ้งเตือนช่องที่ยังไม่กรอก
+                form.reportValidity(); 
                 return;
             }
             
-            // เตรียมข้อมูลลง A4
+            // เตรียมข้อมูลลง A4 (ถ้าช่องไหนว่างจะแสดงเครื่องหมาย "-")
             const teamInput = document.querySelector('input[name="team"]:checked');
             const actionInput = document.querySelector('input[name="action"]:checked');
             document.getElementById('a4Team').innerText = teamInput ? teamInput.value : "-";
@@ -590,9 +596,11 @@
             document.getElementById('a4DateTime').innerText = new Date().toLocaleString('th-TH');
             document.getElementById('a4Address').innerText = document.getElementById('address').value;
             document.getElementById('a4LatLong').innerText = document.getElementById('latlong').value;
-            document.getElementById('a4UnitOld').innerText = document.getElementById('unitOld').value;
+            
+            // แก้ไขข้อที่ 2: ป้องกันการเออเร่อกรณีไม่มีข้อมูลช่องหน่วยไฟ
+            document.getElementById('a4UnitOld').innerText = document.getElementById('unitOld').value || "-";
             document.getElementById('a4DescOld').innerText = document.getElementById('descOld').value || "-";
-            document.getElementById('a4UnitNew').innerText = document.getElementById('unitNew').value;
+            document.getElementById('a4UnitNew').innerText = document.getElementById('unitNew').value || "-";
             document.getElementById('a4DescNew').innerText = document.getElementById('descNew').value || "-";
             document.getElementById('a4Remark').innerText = document.getElementById('remark').value || "-";
 
@@ -610,7 +618,7 @@
             document.getElementById('loadingSubtext').innerText = "รอสักครู่...";
             document.getElementById('loadingOverlay').style.display = "flex";
 
-            // ย้ายแผนที่ไป A4
+            // ย้ายแผนที่ไปแสดงใน A4 เพื่อถ่ายภาพ
             const mapDom = document.getElementById('mapContainer');
             const mapTarget = document.getElementById('a4MapTarget');
             const originalSlot = document.getElementById('originalMapSlot');
@@ -628,7 +636,11 @@
                     // นำรูปไปใส่ใน Modal
                     document.getElementById('finalReportImage').src = finalImgData;
                     
-                    // ย้ายแผนที่กลับที่เดิม
+                    // อัปเดตลิงก์ปุ่มดาวน์โหลด (แก้ไขข้อที่ 3)
+                    const downloadBtn = document.getElementById('downloadReportBtn');
+                    downloadBtn.href = finalImgData;
+                    
+                    // ย้ายแผนที่กลับมาที่ช่องหน้าฟอร์มตามเดิม
                     if(mapDom && originalSlot) {
                         originalSlot.appendChild(mapDom);
                         if(map) map.invalidateSize();
