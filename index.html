@@ -415,65 +415,83 @@
 
         async function fetchAddressData(lat, lng) {
             try {
-                // ใช้ API Key ของคุณที่ได้จาก Longdo Map
+                // API Key ของคุณ
                 const apiKey = "52945903ffe93955bc455275723015f2";
                 
-                // เรียกใช้ Web Service แปลงพิกัดของ Longdo Map (ดึงผลเป็น JSON ภาษาไทย)
+                // เรียก API แปลงพิกัดเป็นที่อยู่
                 const response = await fetch(`https://api.longdo.com/map/services/address?lon=${lng}&lat=${lat}&noelevation=1&key=${apiKey}`);
                 const data = await response.json();
                 
+                // 💡 บรรทัดนี้สำคัญมากสำหรับการทดสอบ: 
+                // ให้คุณกด F12 บนคีย์บอร์ดเพื่อเปิด Developer Console ดู จะเห็นเลยว่าพิกัดนี้ Longdo ส่งอะไรมาให้บ้าง
+                console.log("ข้อมูลที่ดึงได้จาก Longdo Map:", data);
+                
                 if (data) {
-                    let addrText = "";
+                    let addrComponents = [];
                     
-                    // 1. ชื่อสถานที่เด่น หรือ หมู่บ้าน / ชุมชน (ถ้ามี)
-                    if (data.aoi) addrText += data.aoi + " ";
+                    // 1. ดึงชื่อสถานที่สำคัญ / ชื่อหมู่บ้าน / ชุมชน (ถ้า Longdo มีจะอยู่ในนี้)
+                    if (data.aoi) {
+                        addrComponents.push(data.aoi);
+                    }
                     
-                    // 2. ซอย หรือ ถนน (ถ้ามี)
+                    // 2. ดึงชื่อซอย หรือ ถนน
                     if (data.road) {
-                        if (!data.road.includes("ถนน") && !data.road.includes("ถ.") && !data.road.includes("ซอย") && !data.road.includes("ซ.")) {
-                            addrText += "ถ." + data.road + " ";
-                        } else {
-                            addrText += data.road + " ";
+                        let roadText = data.road;
+                        if (!roadText.includes("ถนน") && !roadText.includes("ถ.") && !roadText.includes("ซอย") && !roadText.includes("ซ.")) {
+                            roadText = "ถ." + roadText;
                         }
+                        addrComponents.push(roadText);
                     }
                     
-                    // 3. ตำบล / แขวง
+                    // 3. ดึง ตำบล / แขวง
                     if (data.subdistrict) {
+                        let subDistText = data.subdistrict;
                         if (data.province === "กรุงเทพมหานคร") {
-                            addrText += (data.subdistrict.startsWith("แขวง") ? "" : "แขวง") + data.subdistrict + " ";
+                            if (!subDistText.startsWith("แขวง")) subDistText = "แขวง" + subDistText;
                         } else {
-                            addrText += (data.subdistrict.startsWith("ตำบล") || data.subdistrict.startsWith("ต.")) ? data.subdistrict + " " : "ต." + data.subdistrict + " ";
+                            if (!subDistText.startsWith("ตำบล") && !subDistText.startsWith("ต.")) subDistText = "ต." + subDistText;
                         }
+                        addrComponents.push(subDistText);
                     }
                     
-                    // 4. อำเภอ / เขต
+                    // 4. ดึง อำเภอ / เขต
                     if (data.district) {
+                        let distText = data.district;
                         if (data.province === "กรุงเทพมหานคร") {
-                            addrText += (data.district.startsWith("เขต") ? "" : "เขต") + data.district + " ";
+                            if (!distText.startsWith("เขต")) distText = "เขต" + distText;
                         } else {
-                            addrText += (data.district.startsWith("อำเภอ") || data.district.startsWith("อ.")) ? data.district + " " : "อ." + data.district + " ";
+                            if (!distText.startsWith("อำเภอ") && !distText.startsWith("อ.")) distText = "อ." + distText;
                         }
+                        addrComponents.push(distText);
                     }
                     
-                    // 5. จังหวัด
+                    // 5. ดึง จังหวัด
                     if (data.province) {
-                        if (data.province === "กรุงเทพมหานคร") {
-                            addrText += data.province + " ";
-                        } else {
-                            addrText += (data.province.startsWith("จังหวัด") || data.province.startsWith("จ.")) ? data.province + " " : "จ." + data.province + " ";
+                        let provText = data.province;
+                        if (data.province !== "กรุงเทพมหานคร") {
+                            if (!provText.startsWith("จังหวัด") && !provText.startsWith("จ.")) provText = "จ." + provText;
                         }
+                        addrComponents.push(provText);
                     }
                     
-                    // 6. รหัสไปรษณีย์
-                    if (data.postcode) addrText += data.postcode;
+                    // 6. ดึง รหัสไปรษณีย์
+                    if (data.postcode) {
+                        addrComponents.push(data.postcode);
+                    }
                     
-                    currentAddress = addrText.trim() || "ไม่พบชื่อสถานที่";
+                    // นำข้อมูลทุกส่วนที่มีมาต่อกันด้วยช่องว่าง
+                    currentAddress = addrComponents.join(" ");
+                    
+                    if (!currentAddress.trim()) {
+                        currentAddress = "ไม่พบข้อมูลที่อยู่บริเวณนี้";
+                    }
                 } else {
                     currentAddress = "ไม่พบข้อมูลที่อยู่บริเวณนี้";
                 }
                 
                 document.getElementById('address').value = currentAddress;
             } catch (error) {
+                console.error("เกิดข้อผิดพลาดในการดึงที่อยู่:", error);
                 currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
                 document.getElementById('address').value = currentAddress;
             }
