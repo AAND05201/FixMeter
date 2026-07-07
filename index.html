@@ -415,13 +415,59 @@
 
         async function fetchAddressData(lat, lng) {
             try {
-                // เพิ่ม &accept-language=th เพื่อบังคับขอภาษาไทยเป็นอันดับแรก
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=th`);
+                // ใช้ API Key ของคุณที่ได้จาก Longdo Map
+                const apiKey = "52945903ffe93955bc455275723015f2";
+                
+                // เรียกใช้ Web Service แปลงพิกัดของ Longdo Map (ดึงผลเป็น JSON ภาษาไทย)
+                const response = await fetch(`https://api.longdo.com/map/services/address?lon=${lng}&lat=${lat}&noelevation=1&key=${apiKey}`);
                 const data = await response.json();
                 
-                // ใช้ display_name ซึ่งเป็นที่อยู่แบบเต็มที่ API ดึงมาให้ทั้งหมด
-                if (data && data.display_name) {
-                    currentAddress = data.display_name;
+                if (data) {
+                    let addrText = "";
+                    
+                    // 1. ชื่อสถานที่เด่น หรือ หมู่บ้าน / ชุมชน (ถ้ามี)
+                    if (data.aoi) addrText += data.aoi + " ";
+                    
+                    // 2. ซอย หรือ ถนน (ถ้ามี)
+                    if (data.road) {
+                        if (!data.road.includes("ถนน") && !data.road.includes("ถ.") && !data.road.includes("ซอย") && !data.road.includes("ซ.")) {
+                            addrText += "ถ." + data.road + " ";
+                        } else {
+                            addrText += data.road + " ";
+                        }
+                    }
+                    
+                    // 3. ตำบล / แขวง
+                    if (data.subdistrict) {
+                        if (data.province === "กรุงเทพมหานคร") {
+                            addrText += (data.subdistrict.startsWith("แขวง") ? "" : "แขวง") + data.subdistrict + " ";
+                        } else {
+                            addrText += (data.subdistrict.startsWith("ตำบล") || data.subdistrict.startsWith("ต.")) ? data.subdistrict + " " : "ต." + data.subdistrict + " ";
+                        }
+                    }
+                    
+                    // 4. อำเภอ / เขต
+                    if (data.district) {
+                        if (data.province === "กรุงเทพมหานคร") {
+                            addrText += (data.district.startsWith("เขต") ? "" : "เขต") + data.district + " ";
+                        } else {
+                            addrText += (data.district.startsWith("อำเภอ") || data.district.startsWith("อ.")) ? data.district + " " : "อ." + data.district + " ";
+                        }
+                    }
+                    
+                    // 5. จังหวัด
+                    if (data.province) {
+                        if (data.province === "กรุงเทพมหานคร") {
+                            addrText += data.province + " ";
+                        } else {
+                            addrText += (data.province.startsWith("จังหวัด") || data.province.startsWith("จ.")) ? data.province + " " : "จ." + data.province + " ";
+                        }
+                    }
+                    
+                    // 6. รหัสไปรษณีย์
+                    if (data.postcode) addrText += data.postcode;
+                    
+                    currentAddress = addrText.trim() || "ไม่พบชื่อสถานที่";
                 } else {
                     currentAddress = "ไม่พบข้อมูลที่อยู่บริเวณนี้";
                 }
