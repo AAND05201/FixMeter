@@ -414,21 +414,21 @@
         }
 
         async function fetchAddressData(lat, lng) {
-    try {
-        // เพิ่ม accept-language=th,en เพื่อให้ได้ข้อมูลภาษาไทยเป็นหลัก
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=th,en`);
-        const data = await response.json();
-        
-        // ใช้ display_name เพื่อดึงข้อความสถานที่ทั้งหมดที่ API ส่งมา
-        currentAddress = data.display_name || "ไม่ระบุข้อมูลสถานที่";
-        document.getElementById('address').value = currentAddress;
-    } catch (error) {
-        currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
-        document.getElementById('address').value = currentAddress;
-    }
-}
+            try {
+                // เพิ่ม accept-language=th,en เพื่อให้ได้ข้อมูลภาษาไทยเป็นหลัก
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=th,en`);
+                const data = await response.json();
+                
+                // ใช้ display_name เพื่อดึงข้อความสถานที่ทั้งหมดที่ API ส่งมา
+                currentAddress = data.display_name || "ไม่ระบุข้อมูลสถานที่";
+                document.getElementById('address').value = currentAddress;
+            } catch (error) {
+                currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
+                document.getElementById('address').value = currentAddress;
+            }
+        }
 
-async function showPosition(position) {
+        async function showPosition(position) {
             currentLat = position.coords.latitude.toFixed(6);
             currentLong = position.coords.longitude.toFixed(6);
             document.getElementById('latlong').value = `${currentLat}, ${currentLong}`;
@@ -505,22 +505,74 @@ async function showPosition(position) {
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const barHeight = Math.max(80, height * 0.15);
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-                        ctx.fillRect(0, height - barHeight, width, barHeight);
-
+                        // --- เริ่มส่วนที่แก้ไข การจัดวางข้อความแบบแบ่งซ้าย-ขวา ---
+                        
                         let fontSize = Math.floor(width * 0.035);
                         ctx.font = `${fontSize}px 'Sarabun', sans-serif`;
-                        ctx.fillStyle = 'white';
+                        const lineSpacing = fontSize * 1.5;
                         
                         const now = new Date();
                         const timeStr = now.toLocaleDateString('th-TH') + " " + now.toLocaleTimeString('th-TH');
-                        const startY = height - barHeight + (fontSize * 1.5);
-                        const lineSpacing = fontSize * 1.5;
+                        
+                        // ฟอร์แมต GPS ให้เหลือ 4 ตำแหน่ง
+                        const lat4 = parseFloat(currentLat).toFixed(4);
+                        const long4 = parseFloat(currentLong).toFixed(4);
+                        const gpsStr = `GPS: ${lat4}, ${long4}`;
+                        const addressStr = `สถานที่: ${currentAddress}`;
 
-                        ctx.fillText(`วันที่: ${timeStr}`, 15, startY);
-                        ctx.fillText(`GPS: ${currentLat}, ${currentLong}`, 15, startY + lineSpacing);
-                        ctx.fillText(`สถานที่: ${currentAddress}`, 15, startY + (lineSpacing * 2));
+                        // กำหนดขอบเขตของฝั่งซ้ายและขวา
+                        const paddingX = 20;
+                        const rightX = width * 0.48; // ฝั่งขวาเริ่มที่ 48% ของความกว้างภาพ
+                        const maxRightWidth = width * 0.48; // ความกว้างฝั่งขวาสูงสุดประมาณ 48% ของภาพ
+                        
+                        // จำลองการตัดคำ (สถานที่) เพื่อหาจำนวนบรรทัด และความสูงของแถบดำที่เหมาะสม
+                        let lineCount = 1;
+                        let tempTestLine = '';
+                        for (let i = 0; i < addressStr.length; i++) {
+                            let temp = tempTestLine + addressStr[i];
+                            if (ctx.measureText(temp).width > maxRightWidth && i > 0) {
+                                lineCount++;
+                                tempTestLine = addressStr[i]; // เริ่มบรรทัดใหม่ด้วยตัวอักษรปัจจุบัน
+                            } else {
+                                tempTestLine = temp;
+                            }
+                        }
+                        
+                        // แถบดำต้องมีความสูงพอสำหรับอย่างน้อย 2 บรรทัด (วันที่, GPS) หรือบรรทัดของสถานที่(ถ้ามากกว่า)
+                        const requiredLines = Math.max(2, lineCount);
+                        // เผื่อช่องว่างด้านบนและล่าง (padding) ของแถบดำ
+                        const barHeight = Math.max(80, (requiredLines * lineSpacing) + fontSize); 
+
+                        // วาดพื้นหลังแถบดำ
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                        ctx.fillRect(0, height - barHeight, width, barHeight);
+
+                        // ตั้งค่าสีข้อความและฟอนต์ (เผื่อไว้กรณีสีเพี้ยน)
+                        ctx.font = `${fontSize}px 'Sarabun', sans-serif`;
+                        ctx.fillStyle = 'white';
+                        const startY = height - barHeight + (fontSize * 1.5); // ตำแหน่ง Y เริ่มต้น
+                        
+                        // วาดฝั่งซ้าย (วันที่ และ GPS)
+                        ctx.fillText(`วันที่: ${timeStr}`, paddingX, startY);
+                        ctx.fillText(gpsStr, paddingX, startY + lineSpacing);
+
+                        // วาดฝั่งขวา (สถานที่ พร้อมระบบตัดคำเมื่อยาวเกิน)
+                        let currentY = startY;
+                        let line = '';
+                        for (let i = 0; i < addressStr.length; i++) {
+                            let tempLine = line + addressStr[i];
+                            if (ctx.measureText(tempLine).width > maxRightWidth && i > 0) {
+                                ctx.fillText(line, rightX, currentY);
+                                line = addressStr[i];
+                                currentY += lineSpacing; // ขึ้นบรรทัดใหม่
+                            } else {
+                                line = tempLine;
+                            }
+                        }
+                        // วาดบรรทัดสุดท้ายที่เหลืออยู่
+                        ctx.fillText(line, rightX, currentY);
+
+                        // --- จบส่วนที่แก้ไข ---
 
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
                         
@@ -606,7 +658,7 @@ async function showPosition(position) {
             document.getElementById('a4Address').innerText = document.getElementById('address').value;
             document.getElementById('a4LatLong').innerText = document.getElementById('latlong').value;
             
-            // แก้ไขข้อที่ 2: ป้องกันการเออเร่อกรณีไม่มีข้อมูลช่องหน่วยไฟ
+            // ป้องกันการเออเร่อกรณีไม่มีข้อมูลช่องหน่วยไฟ
             document.getElementById('a4UnitOld').innerText = document.getElementById('unitOld').value || "-";
             document.getElementById('a4DescOld').innerText = document.getElementById('descOld').value || "-";
             document.getElementById('a4UnitNew').innerText = document.getElementById('unitNew').value || "-";
@@ -645,7 +697,7 @@ async function showPosition(position) {
                     // นำรูปไปใส่ใน Modal
                     document.getElementById('finalReportImage').src = finalImgData;
                     
-                    // อัปเดตลิงก์ปุ่มดาวน์โหลด (แก้ไขข้อที่ 3)
+                    // อัปเดตลิงก์ปุ่มดาวน์โหลด
                     const downloadBtn = document.getElementById('downloadReportBtn');
                     downloadBtn.href = finalImgData;
                     
