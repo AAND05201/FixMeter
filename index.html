@@ -363,7 +363,7 @@
         // =========================================================
         // 1. ตั้งค่า URL ของ Google Apps Script (GAS) เก่าของคุณที่นี่ได้เลย
         // =========================================================
-        const GAS_WEB_APP_URL = 'วาง_URL_GAS_ของคุณที่นี่'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzO6WWxZOxXIxlzMUFKJRPHpD2JgFQtPBIkWd0_5ms9R1NNMzMITfu6ZYbO-bJ1HyOMhA/exec'; 
         
         let currentLat = "";
         let currentLong = "";
@@ -414,25 +414,21 @@
         }
 
         async function fetchAddressData(lat, lng) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
-                const data = await response.json();
-                
-                let addr = data.address || {};
-                let addrText = "";
-                if(addr.village || addr.suburb || addr.neighbourhood) addrText += (addr.village || addr.suburb || addr.neighbourhood) + " ";
-                if(addr.town || addr.city || addr.county) addrText += "ต." + (addr.town || addr.city || addr.county) + " ";
-                if(addr.state) addrText += "จ." + addr.state;
-                
-                currentAddress = addrText.trim() || (data.display_name ? data.display_name.substring(0, 50) : "ไม่ระบุ");
-                document.getElementById('address').value = currentAddress;
-            } catch (error) {
-                currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
-                document.getElementById('address').value = currentAddress;
-            }
-        }
+    try {
+        // เพิ่ม accept-language=th,en เพื่อให้ได้ข้อมูลภาษาไทยเป็นหลัก
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=th,en`);
+        const data = await response.json();
+        
+        // ใช้ display_name เพื่อดึงข้อความสถานที่ทั้งหมดที่ API ส่งมา
+        currentAddress = data.display_name || "ไม่ระบุข้อมูลสถานที่";
+        document.getElementById('address').value = currentAddress;
+    } catch (error) {
+        currentAddress = "ไม่สามารถดึงชื่อสถานที่ได้";
+        document.getElementById('address').value = currentAddress;
+    }
+}
 
-        async function showPosition(position) {
+async function showPosition(position) {
             currentLat = position.coords.latitude.toFixed(6);
             currentLong = position.coords.longitude.toFixed(6);
             document.getElementById('latlong').value = `${currentLat}, ${currentLong}`;
