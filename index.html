@@ -34,6 +34,15 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
+        /* แอนิเมชันไอคอนกล้องกระพริบดึงดูดสายตา */
+        @keyframes pulse-camera {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+        }
+        .camera-blink {
+            animation: pulse-camera 1.5s infinite ease-in-out;
+        }
+        
         /* Network Status Bar */
         #networkStatus {
             position: sticky; top: 0; z-index: 50; width: 100%; text-align: center;
@@ -76,6 +85,13 @@
 
         <form id="mainForm" class="p-6 space-y-7">
             
+            <!-- ปุ่มแผนที่ประวัติการส่ง (ส่วนที่เพิ่มใหม่) -->
+            <div>
+                <a href="https://aand05201.github.io/MapFMX/" target="_blank" class="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3.5 px-4 rounded-xl shadow-md text-lg flex justify-center items-center transition active:scale-95 border-b-4 border-[#047857]">
+                    <i class="fa-solid fa-map-location-dot mr-3 text-2xl"></i> แผนที่ประวัติการส่ง
+                </a>
+            </div>
+
             <!-- 0. ทีมปฏิบัติงาน -->
             <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
                 <label class="block font-bold text-gray-700 mb-3 text-lg border-b pb-2"><i class="fa-solid fa-users text-[#5293c6] mr-2"></i>0. ทีมปฏิบัติงาน <span class="text-red-500">*</span></label>
@@ -142,8 +158,9 @@
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-700 mb-1.5">3. ภาพหน้ามิเตอร์เก่า <span class="text-red-500">*</span></label>
                     <input type="file" accept="image/*" id="fileImg3" class="hidden" onchange="processImage(this, 'preview3', 'dataImg3', 'container3')">
-                    <button type="button" onclick="document.getElementById('fileImg3').click()" class="w-full bg-white hover:bg-gray-100 text-gray-600 py-4 rounded-lg border-2 border-dashed border-gray-300 shadow-sm active:scale-95 transition flex flex-col items-center justify-center">
-                        <i class="fa-solid fa-camera fa-2xl mb-2 text-gray-400"></i> <span class="font-medium">ถ่ายภาพ / เลือกรูป</span>
+                    <!-- เพิ่มแอนิเมชัน camera-blink ที่ไอคอนกล้อง -->
+                    <button type="button" onclick="document.getElementById('fileImg3').click()" class="w-full bg-white hover:bg-gray-100 text-gray-600 py-4 rounded-lg border-2 border-dashed border-gray-400 shadow-sm active:scale-95 transition flex flex-col items-center justify-center group">
+                        <i class="fa-solid fa-camera fa-2xl mb-2 text-gray-500 camera-blink"></i> <span class="font-medium group-hover:text-[#7a318f]">ถ่ายภาพ / เลือกรูป</span>
                     </button>
                     <!-- Container สำหรับภาพและการลบ -->
                     <div id="container3" class="relative mt-3 hidden">
@@ -203,8 +220,9 @@
                 <div class="mb-5">
                     <label class="block font-semibold text-gray-700 mb-1.5">6. ภาพหน้ามิเตอร์ใหม่ <span class="text-red-500">*</span></label>
                     <input type="file" accept="image/*" id="fileImg6" class="hidden" onchange="processImage(this, 'preview6', 'dataImg6', 'container6')">
-                    <button type="button" onclick="document.getElementById('fileImg6').click()" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-4 rounded-lg border-2 border-dashed border-[#f6a037] shadow-sm active:scale-95 transition flex flex-col items-center justify-center">
-                        <i class="fa-solid fa-camera fa-2xl mb-2 text-[#f6a037]"></i> <span class="font-medium">ถ่ายภาพ / เลือกรูป</span>
+                    <!-- เพิ่มแอนิเมชัน camera-blink ที่ไอคอนกล้อง -->
+                    <button type="button" onclick="document.getElementById('fileImg6').click()" class="w-full bg-white hover:bg-orange-50 text-gray-700 py-4 rounded-lg border-2 border-dashed border-[#f6a037] shadow-sm active:scale-95 transition flex flex-col items-center justify-center group">
+                        <i class="fa-solid fa-camera fa-2xl mb-2 text-[#f6a037] camera-blink"></i> <span class="font-medium group-hover:text-[#f6a037]">ถ่ายภาพ / เลือกรูป</span>
                     </button>
                     <!-- Container สำหรับภาพและการลบ -->
                     <div id="container6" class="relative mt-3 hidden">
@@ -332,9 +350,10 @@
                     <p class="text-lg mb-1"><strong>หน่วยที่ถอด:</strong> <span id="a4UnitOld" class="text-gray-800 font-bold text-xl"></span> kWh</p>
                     <p class="text-sm text-gray-700 mb-3"><strong>อธิบาย:</strong> <span id="a4DescOld"></span></p>
                     
-                    <div class="space-y-3">
-                        <img id="a4Img3" class="w-full rounded border border-gray-300 hidden" style="max-height: 280px; object-fit: contain; background: white;">
-                        <img id="a4Img4" class="w-full rounded border border-gray-300 hidden" style="max-height: 280px; object-fit: contain; background: white;">
+                    <!-- ส่วนแก้ไข: เอา w-full ออกและเพิ่มโครงสร้างปรับสัดส่วนภาพอัตโนมัติ -->
+                    <div class="space-y-3 text-center">
+                        <img id="a4Img3" class="mx-auto rounded border border-gray-300 hidden" style="max-width: 100%; max-height: 280px; width: auto; height: auto; object-fit: contain; background: white;">
+                        <img id="a4Img4" class="mx-auto rounded border border-gray-300 hidden" style="max-width: 100%; max-height: 280px; width: auto; height: auto; object-fit: contain; background: white;">
                     </div>
                 </div>
 
@@ -345,9 +364,10 @@
                     <p class="text-lg mb-1"><strong>หน่วยที่ติดตั้ง:</strong> <span id="a4UnitNew" class="text-[#5293c6] font-bold text-xl"></span> kWh</p>
                     <p class="text-sm text-gray-700 mb-3"><strong>อธิบาย:</strong> <span id="a4DescNew"></span></p>
                     
-                    <div class="space-y-3">
-                        <img id="a4Img6" class="w-full rounded border border-gray-300 hidden" style="max-height: 280px; object-fit: contain; background: white;">
-                        <img id="a4Img7" class="w-full rounded border border-gray-300 hidden" style="max-height: 280px; object-fit: contain; background: white;">
+                    <!-- ส่วนแก้ไข: เอา w-full ออกและเพิ่มโครงสร้างปรับสัดส่วนภาพอัตโนมัติ -->
+                    <div class="space-y-3 text-center">
+                        <img id="a4Img6" class="mx-auto rounded border border-gray-300 hidden" style="max-width: 100%; max-height: 280px; width: auto; height: auto; object-fit: contain; background: white;">
+                        <img id="a4Img7" class="mx-auto rounded border border-gray-300 hidden" style="max-width: 100%; max-height: 280px; width: auto; height: auto; object-fit: contain; background: white;">
                     </div>
                 </div>
             </div>
